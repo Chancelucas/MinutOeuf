@@ -25,8 +25,24 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy the entire project including vendor
+# Copy only composer files first
+COPY composer.json composer.lock ./
+
+# Install dependencies
+RUN composer install --no-scripts --no-autoloader --no-dev
+
+# Copy the rest of the application
 COPY . .
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html
+# Generate optimized autoloader and run scripts
+RUN composer dump-autoload --optimize \
+    && composer run-script post-install-cmd --no-dev \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/vendor
+
+# Configure PHP error reporting
+RUN echo "error_reporting = E_ALL" > /usr/local/etc/php/conf.d/error-reporting.ini \
+    && echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
+
+# Start Apache in foreground
+CMD ["apache2-foreground"]
