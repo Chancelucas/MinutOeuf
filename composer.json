@@ -1,7 +1,8 @@
 {
     "require": {
         "mongodb/mongodb": "^1.15",
-        "ext-mongodb": "*"
+        "ext-mongodb": "*",
+        "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
         "psr-4": {

@@ -12,12 +12,22 @@ class EggController extends BaseController {
         $this->eggModel = new EggModel();
     }
 
-    public function index() {
-        return $this->render('eggs/index', [
-            'title' => 'MinutOeuf - Minuteur pour œufs parfaits'
-        ]);
+    /**
+     * Récupère la liste des œufs pour la navbar
+     */
+    public function getNavbarEggs(): array
+    {
+        try {
+            return $this->eggModel->getAllEggs();
+        } catch (\Exception $e) {
+            error_log('Erreur lors de la récupération des œufs : ' . $e->getMessage());
+            return [];
+        }
     }
 
+    /**
+     * API : Récupère tous les œufs
+     */
     public function getAllEggs() {
         try {
             $eggs = $this->eggModel->getAllEggs();
@@ -39,6 +49,9 @@ class EggController extends BaseController {
         }
     }
 
+    /**
+     * API : Récupère un œuf par son nom
+     */
     public function getEggByName(string $name) {
         try {
             $egg = $this->eggModel->getEggByName($name);

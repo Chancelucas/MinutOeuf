@@ -2,16 +2,22 @@
 
 namespace App\Models;
 
-use MongoDB\Client;
+use App\Core\BaseModel;
 use MongoDB\Collection;
 
-class EggModel {
-    private Collection $collection;
+class EggModel extends BaseModel {
+    protected function getCollectionName(): string {
+        return 'eggs';
+    }
 
-    public function __construct() {
-        // Connexion à MongoDB Atlas
-        $client = new Client("mongodb+srv://wadyx38:k7NYq73UdTaU9vwH@cluster0.4xafp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
-        $this->collection = $client->minutoeuf->eggs;
+    /**
+     * Normalise un nom d'œuf pour la recherche
+     */
+    private function normalizeName(string $name): string {
+        // Convertit en minuscules et supprime les caractères spéciaux
+        $normalized = mb_strtolower($name, 'UTF-8');
+        $normalized = iconv('UTF-8', 'ASCII//TRANSLIT', $normalized);
+        return preg_replace('/[^a-z0-9]/', '', $normalized);
     }
 
     public function getAllEggs(): array {
@@ -22,6 +28,7 @@ class EggModel {
             foreach ($cursor as $document) {
                 $eggs[] = [
                     'name' => $document->name,
+                    'normalizedName' => $this->normalizeName($document->name),
                     'minutes' => $document->minutes,
                     'instructions' => $document->instructions ?? '',
                     'image' => $document->image ?? null
@@ -35,18 +42,35 @@ class EggModel {
         }
     }
 
-    public function getEggByName(string $name) {
+    public function getEggByName(string $name): ?array {
         try {
-            return $this->collection->findOne(['name' => $name]);
+            $normalizedSearchName = $this->normalizeName($name);
+            
+            // Récupérer tous les œufs et chercher celui qui correspond
+            $eggs = $this->getAllEggs();
+            foreach ($eggs as $egg) {
+                if ($egg['normalizedName'] === $normalizedSearchName) {
+                    return $egg;
+                }
+            }
+            
+            return null;
         } catch (\Exception $e) {
             error_log("MongoDB Error: " . $e->getMessage());
             return null;
         }
     }
 
-    public function createEgg(array $eggData): bool {
+    public function addEgg(array $eggData): bool {
         try {
-            $result = $this->collection->insertOne($eggData);
+            $result = $this->collection->insertOne([
+                'name' => $eggData['name'],
+                'normalizedName' => $this->normalizeName($eggData['name']),
+                'minutes' => $eggData['minutes'],
+                'instructions' => $eggData['instructions'] ?? '',
+                'image' => $eggData['image'] ?? null
+            ]);
+            
             return $result->getInsertedCount() > 0;
         } catch (\Exception $e) {
             error_log("MongoDB Error: " . $e->getMessage());
@@ -57,9 +81,16 @@ class EggModel {
     public function updateEgg(string $name, array $eggData): bool {
         try {
             $result = $this->collection->updateOne(
-                ['name' => $name],
-                ['$set' => $eggData]
+                ['normalizedName' => $this->normalizeName($name)],
+                ['$set' => [
+                    'name' => $eggData['name'],
+                    'normalizedName' => $this->normalizeName($eggData['name']),
+                    'minutes' => $eggData['minutes'],
+                    'instructions' => $eggData['instructions'] ?? '',
+                    'image' => $eggData['image'] ?? null
+                ]]
             );
+            
             return $result->getModifiedCount() > 0;
         } catch (\Exception $e) {
             error_log("MongoDB Error: " . $e->getMessage());
@@ -69,7 +100,10 @@ class EggModel {
 
     public function deleteEgg(string $name): bool {
         try {
-            $result = $this->collection->deleteOne(['name' => $name]);
+            $result = $this->collection->deleteOne([
+                'normalizedName' => $this->normalizeName($name)
+            ]);
+            
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
             error_log("MongoDB Error: " . $e->getMessage());

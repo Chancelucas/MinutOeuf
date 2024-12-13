@@ -1,0 +1,35 @@
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--background-color);
+}
+
+.error-container {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.error-container h1 {
+    font-size: 6rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.error-container h2 {
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.error-container p {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+.error-container .btn {
+    font-size: var(--font-size-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+}

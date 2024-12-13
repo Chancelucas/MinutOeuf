@@ -2,8 +2,10 @@
 
 namespace App\Core;
 
+use App\Controllers\EggPageController;
+use App\Controllers\HomeController;
+
 class Router {
-    private array $routes = [];
     private static ?Router $instance = null;
 
     private function __construct() {}
@@ -15,36 +17,126 @@ class Router {
         return self::$instance;
     }
 
-    public function addRoute(string $method, string $path, array $handler) {
-        $this->routes[] = [
-            'method' => $method,
-            'path' => $path,
-            'handler' => $handler
-        ];
+    public function dispatch() {
+        session_start();
+        $uri = $_SERVER['REQUEST_URI'];
+
+        // Normalisation de l'URI
+        if (!empty($uri) && $uri != '/' && $uri[-1] === "/") {
+            $uri = substr($uri, 0, -1);
+            http_response_code(301);
+            header('Location: ' . $uri);
+            exit;
+        }
+
+        // Redirection vers les URLs en minuscules
+        $lowerUri = strtolower($uri);
+        if ($uri !== $lowerUri) {
+            http_response_code(301);
+            header('Location: ' . $lowerUri);
+            exit;
+        }
+
+        // Gestion des fichiers statiques
+        if (strpos($uri, '/assets/') === 0) {
+            $this->handleStaticFile($uri);
+            return;
+        }
+
+        // Extraction des paramètres de l'URL
+        $params = explode('/', trim($uri, '/'));
+        $this->handleRequest($params);
     }
 
-    public function get(string $path, array $handler) {
-        $this->addRoute('GET', $path, $handler);
+    private function handleRequest(array $params) {
+        try {
+            if (empty($params[0])) {
+                // Page d'accueil
+                $controller = new HomeController();
+                $controller->index();
+                return;
+            }
+
+            switch ($params[0]) {
+                case 'api':
+                    $this->handleApiRoute(array_slice($params, 1));
+                    break;
+
+                case 'admin':
+                    $this->handleAdminRoute(array_slice($params, 1));
+                    break;
+
+                case 'eggs':
+                    if (isset($params[1])) {
+                        $eggName = urldecode($params[1]);
+                        $controller = new EggPageController();
+                        $controller->show($eggName);
+                    } else {
+                        $this->handle404();
+                    }
+                    break;
+
+                default:
+                    $this->handle404();
+                    break;
+            }
+        } catch (\Throwable $th) {
+            error_log($th->getMessage());
+            $this->handle500($th);
+        }
     }
 
-    public function post(string $path, array $handler) {
-        $this->addRoute('POST', $path, $handler);
+    private function handleApiRoute(array $params) {
+        if (empty($params)) {
+            $this->handle404();
+            return;
+        }
+
+        $controllerName = ucfirst(array_shift($params)) . 'Controller';
+        $controllerClass = 'App\\Controllers\\' . $controllerName;
+        
+        if (class_exists($controllerClass)) {
+            $controller = new $controllerClass();
+            $action = isset($params[0]) ? array_shift($params) : 'index';
+            
+            if (method_exists($controller, $action)) {
+                call_user_func_array([$controller, $action], $params);
+                return;
+            }
+        }
+
+        $this->handle404();
     }
 
-    public function put(string $path, array $handler) {
-        $this->addRoute('PUT', $path, $handler);
+    private function handleAdminRoute(array $params) {
+        $controllerName = !empty($params[0]) ? ucfirst(array_shift($params)) : 'Dashboard';
+        $controllerClass = 'App\\Controllers\\' . $controllerName . 'Controller';
+        
+        if (class_exists($controllerClass)) {
+            $controller = new $controllerClass();
+            $action = isset($params[0]) ? array_shift($params) : 'index';
+            
+            if (method_exists($controller, $action)) {
+                call_user_func_array([$controller, $action], $params);
+                return;
+            }
+        }
+
+        $this->handle404();
     }
 
-    public function delete(string $path, array $handler) {
-        $this->addRoute('DELETE', $path, $handler);
+    private function handle404() {
+        http_response_code(404);
+        require_once ROOT . '/src/Views/errors/404.php';
     }
 
-    private function convertPathToRegex(string $path): string {
-        return '#^' . preg_replace('/\{([a-zA-Z]+)\}/', '([^/]+)', $path) . '$#';
+    private function handle500(\Throwable $error) {
+        http_response_code(500);
+        require_once ROOT . '/src/Views/errors/500.php';
     }
 
     private function handleStaticFile(string $uri) {
-        $filePath = __DIR__ . '/../../public' . $uri;
+        $filePath = ROOT . '/public' . $uri;
         if (file_exists($filePath)) {
             $extension = pathinfo($filePath, PATHINFO_EXTENSION);
             $mimeTypes = [
@@ -55,7 +147,6 @@ class Router {
                 'jpeg' => 'image/jpeg',
                 'gif' => 'image/gif',
                 'svg' => 'image/svg+xml',
-                'mp3' => 'audio/mpeg'
             ];
             
             if (isset($mimeTypes[$extension])) {
@@ -64,42 +155,8 @@ class Router {
             
             readfile($filePath);
             exit;
-        } else {
-            http_response_code(404);
-            echo '404 Not Found';
         }
-    }
-
-    public function dispatch() {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = $_SERVER['REQUEST_METHOD'];
-
-        // Support for PUT and DELETE methods via POST
-        if ($method === 'POST' && isset($_POST['_method'])) {
-            $method = strtoupper($_POST['_method']);
-        }
-
-        // Handle static files
-        if (strpos($uri, '/assets/') === 0) {
-            $this->handleStaticFile($uri);
-            return;
-        }
-
-        foreach ($this->routes as $route) {
-            $pattern = $this->convertPathToRegex($route['path']);
-            
-            if ($route['method'] === $method && preg_match($pattern, $uri, $matches)) {
-                array_shift($matches); // Remove full match
-                
-                $controller = new $route['handler'][0]();
-                $action = $route['handler'][1];
-                
-                return call_user_func_array([$controller, $action], $matches);
-            }
-        }
-
-        // 404 Not Found
-        header("HTTP/1.0 404 Not Found");
-        echo '404 Not Found';
+        
+        $this->handle404();
     }
 }

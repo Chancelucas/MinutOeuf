@@ -2,6 +2,7 @@
 let currentEgg = null;
 let timerInterval = null;
 let timeLeft = 0;
+let isPaused = false;
 
 // Fonctions pour la partie publique
 const publicApp = {
@@ -73,45 +74,110 @@ const publicApp = {
         }
     },
 
-    // Gérer le minuteur
-    startTimer(minutes) {
-        timeLeft = minutes * 60;
-        this.updateTimerDisplay();
-        
-        if (timerInterval) clearInterval(timerInterval);
-        
+    // Démarrer le minuteur
+    startTimer() {
+        const minutesElement = document.getElementById('minutes');
+        if (!minutesElement) return;
+
+        // Si le minuteur est en pause, reprendre là où on s'est arrêté
+        if (!isPaused) {
+            const minutes = parseInt(minutesElement.textContent);
+            timeLeft = minutes * 60;
+        }
+
+        // Réinitialiser l'état de pause
+        isPaused = false;
+
+        // Activer/désactiver les boutons appropriés
+        document.getElementById('startTimer').disabled = true;
+        document.getElementById('pauseTimer').disabled = false;
+        document.getElementById('resetTimer').disabled = false;
+
+        // Démarrer le minuteur
         timerInterval = setInterval(() => {
-            timeLeft--;
-            this.updateTimerDisplay();
-            
-            if (timeLeft <= 0) {
+            if (timeLeft > 0) {
+                timeLeft--;
+                this.updateTimerDisplay();
+            } else {
                 this.timerEnd();
             }
         }, 1000);
     },
 
+    // Mettre en pause le minuteur
+    pauseTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isPaused = true;
+
+            // Activer/désactiver les boutons appropriés
+            document.getElementById('startTimer').disabled = false;
+            document.getElementById('pauseTimer').disabled = true;
+        }
+    },
+
+    // Réinitialiser le minuteur
+    resetTimer() {
+        // Arrêter le minuteur
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // Réinitialiser l'état
+        isPaused = false;
+
+        // Réinitialiser l'affichage
+        const minutesElement = document.getElementById('minutes');
+        if (minutesElement) {
+            const initialMinutes = parseInt(minutesElement.textContent);
+            timeLeft = initialMinutes * 60;
+            this.updateTimerDisplay();
+        }
+
+        // Réinitialiser les boutons
+        document.getElementById('startTimer').disabled = false;
+        document.getElementById('pauseTimer').disabled = true;
+        document.getElementById('resetTimer').disabled = true;
+    },
+
+    // Mettre à jour l'affichage du minuteur
     updateTimerDisplay() {
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
-        const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         
-        const timer = document.getElementById('timer');
-        if (timer) timer.textContent = display;
+        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
     },
 
+    // Gérer la fin du minuteur
     timerEnd() {
-        clearInterval(timerInterval);
-        this.showNotification("Votre œuf est prêt !");
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // Réinitialiser les boutons
+        document.getElementById('startTimer').disabled = false;
+        document.getElementById('pauseTimer').disabled = true;
+        document.getElementById('resetTimer').disabled = true;
+
+        // Afficher une notification
+        this.showNotification("Temps écoulé ! Votre œuf est prêt !");
     },
 
+    // Afficher une notification
     showNotification(message) {
-        const notification = document.createElement('div');
-        notification.className = 'alert alert-success';
+        const notification = document.getElementById('notification');
+        if (!notification) return;
+
         notification.textContent = message;
-        
-        document.querySelector('.main-content').prepend(notification);
-        
-        setTimeout(() => notification.remove(), 5000);
+        notification.classList.add('show');
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
     }
 };
 

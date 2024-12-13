@@ -4,15 +4,22 @@ namespace App\Core;
 
 use MongoDB\Client;
 use MongoDB\Database as MongoDatabase;
+use App\Core\Config;
 
 class Database {
     private static ?Database $instance = null;
     private MongoDatabase $database;
 
     private function __construct() {
-        $config = require __DIR__ . '/../../config/database.php';
-        $client = new Client($config['mongodb']['uri']);
-        $this->database = $client->{$config['mongodb']['database']};
+        $uri = Config::get('MONGODB_URI');
+        $dbName = Config::get('MONGODB_DATABASE');
+        
+        if (empty($uri) || empty($dbName)) {
+            throw new \RuntimeException('MongoDB configuration is missing. Please check your .env file.');
+        }
+
+        $client = new Client($uri);
+        $this->database = $client->$dbName;
     }
 
     public static function getInstance(): Database {

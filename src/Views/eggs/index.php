@@ -18,9 +18,9 @@
             <span class="minutes">00</span>:<span class="seconds">00</span>
         </div>
         <div class="timer-controls">
-            <button id="startTimer" class="button primary">Démarrer</button>
-            <button id="pauseTimer" class="button secondary" disabled>Pause</button>
-            <button id="resetTimer" class="button secondary" disabled>Réinitialiser</button>
+            <button id="startTimer" class="timer-btn timer-btn-primary">Démarrer</button>
+            <button id="pauseTimer" class="timer-btn timer-btn-secondary" disabled>Pause</button>
+            <button id="resetTimer" class="timer-btn timer-btn-secondary" disabled>Réinitialiser</button>
         </div>
     </div>
 </div>

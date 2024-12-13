@@ -13,24 +13,36 @@ class Config {
             foreach ($lines as $line) {
                 if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
                     list($key, $value) = explode('=', $line, 2);
-                    self::$config[trim($key)] = trim($value);
+                    $key = trim($key);
+                    $value = trim($value);
+                    self::$config[$key] = $value;
+                    putenv("$key=$value");
                 }
             }
         }
 
         // Configuration par défaut
-        self::$config = array_merge([
-            'mongodb_uri' => getenv('MONGODB_URI') ?: 'mongodb://localhost:27017',
-            'app_name' => 'MinutOeuf',
-            'debug' => false
-        ], self::$config);
+        $defaults = [
+            'APP_NAME' => 'MinutOeuf',
+            'APP_DEBUG' => false,
+            'MONGODB_URI' => 'mongodb://localhost:27017',
+            'MONGODB_DATABASE' => 'minutoeuf'
+        ];
+
+        foreach ($defaults as $key => $value) {
+            if (!isset(self::$config[$key])) {
+                self::$config[$key] = getenv($key) ?: $value;
+                putenv("$key=" . self::$config[$key]);
+            }
+        }
     }
 
     public static function get(string $key, $default = null) {
-        return self::$config[$key] ?? $default;
+        return self::$config[$key] ?? getenv($key) ?: $default;
     }
 
     public static function set(string $key, $value) {
         self::$config[$key] = $value;
+        putenv("$key=$value");
     }
 }

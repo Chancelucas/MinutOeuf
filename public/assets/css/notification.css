@@ -1,0 +1,17 @@
+#notification {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-color);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    transition: top 0.3s ease-in-out;
+}
+
+#notification.show {
+    top: var(--spacing-lg);
+}

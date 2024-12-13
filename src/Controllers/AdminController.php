@@ -4,22 +4,22 @@ namespace App\Controllers;
 
 use App\Core\BaseController;
 use App\Models\EggModel;
+use App\Middleware\AdminMiddleware;
 
 class AdminController extends BaseController {
     private EggModel $eggModel;
+    private AdminMiddleware $adminMiddleware;
 
     public function __construct() {
-        // Vérifier si l'utilisateur est connecté
-        if (!isset($_SESSION['user']) || $_SESSION['role'] !== 'admin') {
-            header('Location: /login');
-            exit;
-        }
-        
         $this->eggModel = new EggModel();
+        $this->adminMiddleware = new AdminMiddleware();
     }
 
     public function index() {
-        $eggs = $this->eggModel->findAll();
+        // Vérifier l'authentification admin
+        $this->adminMiddleware->handle();
+
+        $eggs = $this->eggModel->getAllEggs();
         return $this->render('admin/index', [
             'title' => 'MinutOeuf - Administration',
             'eggs' => $eggs
@@ -27,6 +27,8 @@ class AdminController extends BaseController {
     }
 
     public function createEgg() {
+        $this->adminMiddleware->handle();
+        
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!$this->validateEggData($data)) {
@@ -36,13 +38,15 @@ class AdminController extends BaseController {
             ]);
         }
 
-        $result = $this->eggModel->create($data);
+        $result = $this->eggModel->createEgg($data);
         return $this->json([
             'success' => $result
         ]);
     }
 
     public function updateEgg(string $name) {
+        $this->adminMiddleware->handle();
+        
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!$this->validateEggData($data)) {
@@ -52,14 +56,16 @@ class AdminController extends BaseController {
             ]);
         }
 
-        $result = $this->eggModel->update(['name' => $name], $data);
+        $result = $this->eggModel->updateEgg($name, $data);
         return $this->json([
             'success' => $result
         ]);
     }
 
     public function deleteEgg(string $name) {
-        $result = $this->eggModel->delete(['name' => $name]);
+        $this->adminMiddleware->handle();
+        
+        $result = $this->eggModel->deleteEgg($name);
         return $this->json([
             'success' => $result
         ]);
