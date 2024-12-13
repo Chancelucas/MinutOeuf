@@ -3,12 +3,22 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Models\EggModel;
+use App\Core\Config;
 
 try {
+    echo "Démarrage de l'initialisation de la base de données...\n";
+    
+    // Charger la configuration
+    Config::load();
+    
+    echo "Configuration chargée. URI MongoDB: " . Config::get('MONGODB_URI') . "\n";
+    
     $eggModel = new EggModel();
+    echo "Modèle EggModel créé\n";
 
     // Supprimer toutes les données existantes
-    $eggModel->getCollection()->deleteMany([]);
+    $result = $eggModel->getCollection()->deleteMany([]);
+    echo "Suppression des anciennes données : " . $result->getDeletedCount() . " documents supprimés\n";
 
     // Données des œufs
     $eggs = [
@@ -52,9 +62,9 @@ try {
                 'Plongez l\'œuf dans l\'eau froide pour arrêter la cuisson'
             ],
             'tips' => [
+                'Utilisez des œufs à température ambiante',
                 'Parfait pour les pique-niques',
-                'Pour éviter le cercle verdâtre autour du jaune, ne dépassez pas le temps de cuisson',
-                'Se conserve une semaine au réfrigérateur'
+                'Se conserve jusqu\'à une semaine au réfrigérateur'
             ]
         ],
         [
@@ -90,18 +100,16 @@ try {
         ]
     ];
 
-    // Insérer les données
-    $success = 0;
+    // Insérer les nouvelles données
     foreach ($eggs as $egg) {
-        if ($eggModel->create($egg)) {
-            $success++;
-        }
+        $result = $eggModel->getCollection()->insertOne($egg);
+        echo "Œuf '{$egg['name']}' inséré avec l'ID : " . $result->getInsertedId() . "\n";
     }
 
-    echo "Données insérées avec succès !\n";
-    echo "$success œufs ajoutés sur " . count($eggs) . " total.\n";
+    echo "Initialisation terminée avec succès!\n";
 
-} catch (\Exception $e) {
+} catch (Exception $e) {
     echo "Erreur lors de l'initialisation : " . $e->getMessage() . "\n";
-    exit(1);
+    echo "Trace : " . $e->getTraceAsString() . "\n";
+    throw $e; // Pour s'assurer que le script échoue si l'initialisation échoue
 }
