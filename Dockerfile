@@ -29,16 +29,14 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
 # Install dependencies
-RUN composer install --no-scripts --no-autoloader --no-dev
+RUN composer install --no-dev --prefer-dist --no-scripts --no-progress --no-interaction
 
 # Copy the rest of the application
 COPY . .
 
-# Generate optimized autoloader and run scripts
-RUN composer dump-autoload --optimize \
-    && composer run-script post-install-cmd --no-dev \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/vendor
+# Final composer optimization
+RUN composer dump-autoload --optimize --no-dev \
+    && chown -R www-data:www-data /var/www/html
 
 # Configure PHP error reporting
 RUN echo "error_reporting = E_ALL" > /usr/local/etc/php/conf.d/error-reporting.ini \
