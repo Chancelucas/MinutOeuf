@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: minutoeuf
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+    buildCommand: docker build -t minutoeuf .
+    startCommand: docker run -p $PORT:80 minutoeuf
+    healthCheckPath: /
+    autoDeploy: true
