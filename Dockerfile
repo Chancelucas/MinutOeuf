@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
+    ca-certificates \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb
 
@@ -41,6 +42,10 @@ RUN composer dump-autoload --optimize --no-dev \
 # Configure PHP error reporting
 RUN echo "error_reporting = E_ALL" > /usr/local/etc/php/conf.d/error-reporting.ini \
     && echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
+
+# Configure MongoDB SSL
+RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini \
+    && echo "mongodb.debug=off" >> /usr/local/etc/php/conf.d/mongodb.ini
 
 # Make entrypoint script executable
 RUN chmod +x /var/www/html/docker-entrypoint.sh
