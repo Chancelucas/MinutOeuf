@@ -1,10 +1,11 @@
 #!/bin/sh
+set -e
 
-# Attendre que MongoDB soit prêt
+echo "Attente de MongoDB..."
 sleep 10
 
-# Initialiser la base de données
+echo "Tentative d'initialisation de la base de données..."
 php /var/www/html/scripts/init_eggs.php
 
-# Démarrer Apache
+echo "Démarrage d'Apache..."
 apache2-foreground
