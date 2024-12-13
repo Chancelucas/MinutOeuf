@@ -1,0 +1,19 @@
+/* Import des fichiers de configuration et composants */
+@import url('/assets/css/config.css');
+@import url('/assets/css/navbar.css');
+@import url('/assets/css/eggs.css');
+@import url('/assets/css/auth.css');
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    background-color: var(--light-color);
+    color: var(--text-primary);
+}

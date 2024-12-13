@@ -1,0 +1,114 @@
+/* Styles de la barre latérale */
+
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background-color: var(--beige-color);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.sidebar-header {
+    text-align: center;
+    padding-bottom: var(--spacing-lg);
+    border-bottom: var(--border-width) solid var(--text-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: var(--spacing-sm);
+}
+
+.sidebar h1 {
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* Liste des œufs */
+.egg-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+
+.egg-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    background-color: var(--background-color);
+    border: none;
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.egg-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateX(var(--spacing-xs));
+}
+
+.egg-item.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Pied de la barre latérale */
+.sidebar-footer {
+    padding-top: var(--spacing-md);
+    border-top: var(--border-width) solid var(--text-light);
+}
+
+/* Menu d'administration dans la barre latérale */
+.admin-menu {
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-menu h3 {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.admin-menu ul {
+    list-style: none;
+}
+
+.admin-menu li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.admin-btn {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.admin-btn:hover {
+    background-color: var(--primary-color);
+}
