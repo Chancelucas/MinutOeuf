@@ -42,5 +42,11 @@ RUN composer dump-autoload --optimize --no-dev \
 RUN echo "error_reporting = E_ALL" > /usr/local/etc/php/conf.d/error-reporting.ini \
     && echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
 
+# Make entrypoint script executable
+RUN chmod +x /var/www/html/docker-entrypoint.sh
+
+# Use custom entrypoint script
+ENTRYPOINT ["/var/www/html/docker-entrypoint.sh"]
+
 # Start Apache in foreground
 CMD ["apache2-foreground"]
