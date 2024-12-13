@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     ca-certificates \
+    openssl \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb
 
@@ -39,13 +40,16 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev \
     && chown -R www-data:www-data /var/www/html
 
-# Configure PHP error reporting
+# Configure PHP error reporting and MongoDB
 RUN echo "error_reporting = E_ALL" > /usr/local/etc/php/conf.d/error-reporting.ini \
-    && echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
-
-# Configure MongoDB SSL
-RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini \
+    && echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini \
+    && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini \
     && echo "mongodb.debug=off" >> /usr/local/etc/php/conf.d/mongodb.ini
+
+# Download MongoDB CA certificate
+RUN curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-archive-keyring.gpg \
+    && curl -fsSL https://raw.githubusercontent.com/mongodb/mongo/master/src/mongo/util/net/server.pem -o /etc/ssl/certs/mongodb.pem \
+    && chmod 644 /etc/ssl/certs/mongodb.pem
 
 # Make entrypoint script executable
 RUN chmod +x /var/www/html/docker-entrypoint.sh
