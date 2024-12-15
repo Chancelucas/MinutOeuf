@@ -14,28 +14,29 @@ class Database {
             
             // Vérifier les variables d'environnement
             error_log("[Database] Checking environment variables");
-            error_log("[Database] MONGODB_URI: " . (getenv('MONGODB_URI') ? 'set' : 'not set'));
-            error_log("[Database] MONGODB_DATABASE: " . (getenv('MONGODB_DATABASE') ? 'set' : 'not set'));
+            $uri = getenv('MONGODB_URI');
+            $dbName = getenv('MONGODB_DATABASE');
             
-            $config = require __DIR__ . '/../../config/config.php';
-            error_log("[Database] Config loaded: " . json_encode($config['database'], JSON_UNESCAPED_SLASHES));
+            error_log("[Database] MONGODB_URI: " . ($uri ? 'set' : 'not set'));
+            error_log("[Database] MONGODB_DATABASE: " . ($dbName ? 'set' : 'not set'));
             
-            if (empty($config['database']['uri'])) {
+            if (empty($uri)) {
                 throw new \Exception("Database URI is missing");
             }
-            if (empty($config['database']['name'])) {
+            if (empty($dbName)) {
                 throw new \Exception("Database name is missing");
             }
 
-            error_log("[Database] Attempting to connect with URI: " . preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $config['database']['uri']));
+            error_log("[Database] Attempting to connect with URI: " . preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $uri));
             
-            $client = new Client($config['database']['uri'], [
+            $client = new Client($uri, [
                 'retryWrites' => true,
                 'w' => 'majority',
-                'ssl' => true
+                'ssl' => true,
+                'tls' => true
             ]);
             
-            $this->database = $client->selectDatabase($config['database']['name']);
+            $this->database = $client->selectDatabase($dbName);
             
             // Test the connection
             error_log("[Database] Testing connection with ping command");
