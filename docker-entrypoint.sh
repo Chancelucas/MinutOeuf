@@ -33,7 +33,7 @@ for i in {1..30}; do
 done
 
 echo "Initializing database..."
-php /var/www/html/scripts/init_eggs.php
+php /var/www/html/scripts/init_db.php
 
 echo "Starting Apache..."
 apache2-foreground
