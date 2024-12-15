@@ -28,8 +28,8 @@ ob_start();
         </div>
 
         <div class="form-actions">
-            <a href="/admin" class="btn btn-secondary">Annuler</a>
-            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a href="/admin" class="btn btn-primary">Annuler</a>
+            <button type="submit" class="btn btn-secondary ">Ajouter</button>
         </div>
     </form>
 </div>

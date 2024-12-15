@@ -5,10 +5,15 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: MONGODB_URI
-        value: mongodb+srv://wadyx38:k7NYq73UdTaU9vwH@cluster0.4xafp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&authSource=admin&ssl=true
+        sync: false
       - key: MONGODB_DATABASE
         value: minutoeuf
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
     buildCommand: docker build -t minutoeuf .
-    startCommand: docker run -p $PORT:80 minutoeuf
+    startCommand: docker run -p $PORT:80 -e MONGODB_URI=$MONGODB_URI minutoeuf
     healthCheckPath: /
     autoDeploy: true
+    plan: free

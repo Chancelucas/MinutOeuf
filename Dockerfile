@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 php:8.2-apache
+FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -30,11 +30,14 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
-COPY . /var/www/html/
+# Copy composer files first
+COPY composer.json composer.lock ./
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Copy application files
+COPY . .
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -42,7 +45,7 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/public
 
 # Make entrypoint script executable
-RUN chmod +x /var/www/html/docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 # Use custom entrypoint script
-CMD ["/bin/bash", "/var/www/html/docker-entrypoint.sh"]
+CMD ["/bin/bash", "docker-entrypoint.sh"]
