@@ -21,6 +21,12 @@ ob_start();
                 <button class="stop-timer btn btn-secondary" disabled>Stop</button>
                 <button class="reset-timer btn btn-secondary" disabled>Réinitialiser</button>
             </div>
+            
+            <!-- Audio element as fallback -->
+            <audio id="alarm-sound" preload="auto">
+                <source src="/assets/sounds/alarms.mp3" type="audio/mpeg">
+                Votre navigateur ne supporte pas l'élément audio.
+            </audio>
         </div>
 
         <div class="egg-instructions">
@@ -51,4 +57,5 @@ ob_start();
 
 <?php
 $content = ob_get_clean();
-require __DIR__ . '/../layout.php';
+require dirname(__DIR__) . '/layout.php';
+?>

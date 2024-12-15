@@ -4,18 +4,21 @@ class Timer {
         this.timeLeft = 0;
         this.timerId = null;
         this.alarmInterval = null;
-        this.audio = new Audio('/public/assets/sounds/alarms.mp3');
+        this.audio = new Audio('/assets/sounds/alarms.mp3');
         this.audio.loop = true;
     }
 
     init() {
         if (this.initialized) return;
 
-        // DOM elements - Utilisation des classes au lieu des IDs
-        this.timerDisplay = document.querySelector('.timer-display');
-        this.startButton = document.querySelector('.start-timer');
-        this.stopButton = document.querySelector('.stop-timer');
-        this.resetButton = document.querySelector('.reset-timer');
+        // Log pour le débogage
+        console.log('Initializing timer...');
+
+        // DOM elements avec sélecteurs plus précis
+        this.timerDisplay = document.querySelector('.timer-section .timer-display');
+        this.startButton = document.querySelector('.timer-section .start-timer');
+        this.stopButton = document.querySelector('.timer-section .stop-timer');
+        this.resetButton = document.querySelector('.timer-section .reset-timer');
 
         console.log('Timer elements:', {
             display: this.timerDisplay,
@@ -26,6 +29,7 @@ class Timer {
 
         if (!this.timerDisplay || !this.startButton || !this.stopButton || !this.resetButton) {
             console.error('Some timer elements are missing');
+            console.log('HTML content:', document.body.innerHTML);
             return;
         }
 
@@ -36,6 +40,7 @@ class Timer {
             this.setTime(minutes);
             this.start();
         });
+
         this.stopButton.addEventListener('click', () => this.stop());
         this.resetButton.addEventListener('click', () => this.reset());
 
