@@ -24,7 +24,7 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV PORT=80
 
 # Configure Apache
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
@@ -46,7 +46,8 @@ COPY . .
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
-    && chmod -R 755 /var/www/html/public
+    && chmod -R 755 /var/www/html/public \
+    && chmod 644 /var/www/html/public/.htaccess
 
 # Make entrypoint script executable
 RUN chmod +x docker-entrypoint.sh

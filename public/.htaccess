@@ -1,15 +1,26 @@
+Options +FollowSymLinks
 RewriteEngine On
 RewriteBase /
 
 # Permettre l'accès direct aux fichiers existants
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L,QSA]
 
-# Rediriger toutes les autres requêtes vers index.php
-RewriteRule ^ index.php [L]
+# Protection contre l'accès aux fichiers .htaccess
+<Files ~ "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy all
+</Files>
 
 # Autoriser l'accès aux ressources statiques
-<FilesMatch "\.(css|js|jpg|jpeg|png|gif)$">
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|mp3)$">
     Order Allow,Deny
     Allow from all
 </FilesMatch>
+
+# Headers de sécurité
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
