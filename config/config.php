@@ -2,12 +2,13 @@
 
 return [
     'database' => [
-        'uri' => getenv('MONGODB_URI') ?: 'mongodb+srv://wadyx38:k7NYq73UdTaU9vwH@cluster0.4xafp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&authSource=admin',
-        'name' => getenv('MONGODB_DATABASE') ?: 'minutoeuf',
+        'uri' => getenv('MONGODB_URI'),
+        'name' => getenv('MONGODB_DATABASE'),
     ],
     'app' => [
         'name' => 'MinutOeuf',
-        'debug' => true,
-        'url' => getenv('APP_URL') ?: 'http://localhost:8080',
+        'debug' => getenv('APP_DEBUG') === 'true',
+        'env' => getenv('APP_ENV') ?: 'production',
+        'url' => getenv('APP_URL'),
     ]
 ];
