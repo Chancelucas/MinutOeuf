@@ -7,16 +7,35 @@ echo "Testing MongoDB connection...\n";
 try {
     // Afficher les variables d'environnement (masquer les informations sensibles)
     $uri = getenv('MONGODB_URI');
+    $dbName = getenv('MONGODB_DATABASE');
+    
+    if (empty($uri) || empty($dbName)) {
+        throw new Exception("Missing required environment variables");
+    }
+    
     $maskedUri = preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $uri);
     echo "MONGODB_URI: " . $maskedUri . "\n";
-    echo "MONGODB_DATABASE: " . getenv('MONGODB_DATABASE') . "\n";
+    echo "MONGODB_DATABASE: " . $dbName . "\n";
     echo "APP_ENV: " . getenv('APP_ENV') . "\n";
     echo "APP_DEBUG: " . getenv('APP_DEBUG') . "\n";
     echo "APP_URL: " . getenv('APP_URL') . "\n";
 
+    // Options de connexion MongoDB
+    $options = [
+        'retryWrites' => true,
+        'w' => 'majority',
+        'ssl' => true,
+        'tls' => true,
+        'tlsAllowInvalidCertificates' => true,
+        'serverSelectionTimeoutMS' => 5000,
+        'connectTimeoutMS' => 10000
+    ];
+
+    echo "Connection options: " . json_encode($options) . "\n";
+
     // Tester la connexion MongoDB
-    $client = new MongoDB\Client(getenv('MONGODB_URI'));
-    $database = $client->selectDatabase(getenv('MONGODB_DATABASE'));
+    $client = new MongoDB\Client($uri, $options);
+    $database = $client->selectDatabase($dbName);
     
     // Tester une commande ping
     $result = $database->command(['ping' => 1]);

@@ -12,33 +12,54 @@ echo "APP_ENV: $APP_ENV"
 echo "APP_DEBUG: $APP_DEBUG"
 echo "APP_URL: $APP_URL"
 
+# Vérifier les variables d'environnement requises
+if [ -z "$MONGODB_URI" ]; then
+    echo "Error: MONGODB_URI is not set"
+    exit 1
+fi
+
+if [ -z "$MONGODB_DATABASE" ]; then
+    echo "Error: MONGODB_DATABASE is not set"
+    exit 1
+fi
+
 # Configure Apache to use the PORT environment variable
 sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf
 sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf
 
-# Test database connection with detailed output
+# Configure PHP
+echo "Configuring PHP..."
+{
+    echo "error_reporting = E_ALL"
+    echo "display_errors = On"
+    echo "log_errors = On"
+    echo "error_log = /dev/stderr"
+    echo "extension=mongodb.so"
+    echo "mongodb.debug=1"
+} >> /usr/local/etc/php/php.ini
+
+# Configure Apache
+echo "Configuring Apache..."
+{
+    echo "LogLevel debug"
+    echo "ErrorLog /dev/stderr"
+    echo "ServerName localhost"
+} >> /etc/apache2/apache2.conf
+
+# Test database connection
 echo "Testing database connection..."
-php /var/www/html/scripts/test_db.php
-if [ $? -ne 0 ]; then
-    echo "Database connection test failed! Check the logs above for details."
-    echo "Continuing anyway to show error page..."
+if ! php /var/www/html/scripts/test_db.php; then
+    echo "Warning: Database connection test failed. Check the logs above for details."
+    # Ne pas quitter, permettre à Apache de démarrer pour afficher la page d'erreur
 fi
 
-# Enable Apache error logging
-echo "Configuring Apache error logging..."
-echo "LogLevel debug" >> /etc/apache2/apache2.conf
-echo "ErrorLog /dev/stderr" >> /etc/apache2/apache2.conf
-
-# Enable PHP error logging
-echo "Configuring PHP error logging..."
-echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini
-echo "display_errors = On" >> /usr/local/etc/php/php.ini
-echo "log_errors = On" >> /usr/local/etc/php/php.ini
-echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
-
-# Add MongoDB PHP extension debug
-echo "extension=mongodb.so" >> /usr/local/etc/php/php.ini
-echo "mongodb.debug=1" >> /usr/local/etc/php/php.ini
+# Initialize database if test was successful
+if [ $? -eq 0 ]; then
+    echo "Initializing database..."
+    if ! php /var/www/html/scripts/init_db.php; then
+        echo "Warning: Database initialization failed. Check the logs above for details."
+    fi
+fi
 
 echo "Starting Apache..."
-apache2-foreground
+exec apache2-foreground

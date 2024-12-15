@@ -29,13 +29,20 @@ class Database {
 
             error_log("[Database] Attempting to connect with URI: " . preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $uri));
             
-            $client = new Client($uri, [
+            // Options de connexion MongoDB
+            $options = [
                 'retryWrites' => true,
                 'w' => 'majority',
                 'ssl' => true,
-                'tls' => true
-            ]);
+                'tls' => true,
+                'tlsAllowInvalidCertificates' => true, // Pour le développement uniquement
+                'serverSelectionTimeoutMS' => 5000,
+                'connectTimeoutMS' => 10000
+            ];
+
+            error_log("[Database] Connection options: " . json_encode($options));
             
+            $client = new Client($uri, $options);
             $this->database = $client->selectDatabase($dbName);
             
             // Test the connection
