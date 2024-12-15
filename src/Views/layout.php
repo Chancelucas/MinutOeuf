@@ -1,6 +1,6 @@
 <?php
 // Vérifier si nous sommes sur une page d'administration
-$isAdminPage = strpos($_SERVER['REQUEST_URI'], '/admin') === 0;
+$isAdminPage = str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -14,8 +14,8 @@ $isAdminPage = strpos($_SERVER['REQUEST_URI'], '/admin') === 0;
     <header>
         <nav>
             <div class="logo hover-lift">
-                <a href="/">
-                    <img src="/assets/image/minutoeuf.jpg" alt="MinutOeuf Logo">
+                <a href="/" >
+                    <img src="/assets/image/minutoeuf.jpg" alt="Logo">
                 </a>
             </div>
             <ul>
@@ -32,6 +32,6 @@ $isAdminPage = strpos($_SERVER['REQUEST_URI'], '/admin') === 0;
         <p>&copy; <?= date('Y') ?> MinutOeuf. Tous droits réservés.</p>
     </footer>
 
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/timer.js"></script>
 </body>
 </html>

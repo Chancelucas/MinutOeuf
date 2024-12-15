@@ -25,9 +25,23 @@
     color: var(--color-text-inverse);
 }
 
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #3dbeb6;
+}
+
 .btn-danger {
     background-color: var(--color-danger);
     color: var(--color-text-inverse);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Cards */
@@ -129,6 +143,34 @@
 .alert-warning {
     background-color: var(--color-warning);
     color: var(--color-text);
+}
+
+/* Timer */
+.timer-section {
+    text-align: center;
+    padding: 2rem;
+    background-color: var(--light-color);
+    border-radius: 10px;
+    margin: 2rem 0;
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: bold;
+    font-family: monospace;
+    margin: 1rem 0;
+    color: var(--primary-color);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.timer-controls .btn {
+    min-width: 120px;
 }
 
 /* Responsive */

@@ -10,18 +10,16 @@ ob_start();
         <h1><?= htmlspecialchars($egg['type']) ?></h1>
         
         <div class="timer-section">
-            <div class="timer" id="timer">
-                <div class="timer-display">
-                    <span class="minutes">00</span>:<span class="seconds">00</span>
-                </div>
+            <div class="timer-display">
+                <span class="minutes">00</span>:<span class="seconds">00</span>
             </div>
             
             <div class="timer-controls">
-                <button class="start-timer" data-time="<?= htmlspecialchars($egg['cookingTime']) ?>">
+                <button class="start-timer btn btn-primary" data-time="<?= htmlspecialchars($egg['cookingTime']) ?>">
                     Démarrer
                 </button>
-                <button class="stop-timer" disabled>Arrêter</button>
-                <button class="reset-timer" disabled>Réinitialiser</button>
+                <button class="stop-timer btn btn-secondary" disabled>Stop</button>
+                <button class="reset-timer btn btn-secondary" disabled>Réinitialiser</button>
             </div>
         </div>
 
