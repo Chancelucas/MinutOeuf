@@ -12,18 +12,17 @@ class Database {
         try {
             error_log("[Database] Initializing database connection");
             
-            // Charger la configuration
-            $config = require __DIR__ . '/../../config/database.php';
-            $mongoConfig = $config['mongodb'];
-            
             // Vérifier les variables d'environnement
             error_log("[Database] Checking environment variables");
-            $uri = $mongoConfig['uri'];
-            $dbName = $mongoConfig['database'];
+            error_log("[Database] Available environment variables: " . implode(", ", array_keys($_ENV)));
             
-            error_log("[Database] MONGODB_URI: " . ($uri ? 'set' : 'not set'));
-            error_log("[Database] MONGODB_DATABASE: " . ($dbName ? 'set' : 'not set'));
-            error_log("[Database] Connection options: " . json_encode($mongoConfig['options']));
+            // Essayer différentes méthodes pour obtenir les variables d'environnement
+            $uri = getenv('MONGODB_URI') ?: $_ENV['MONGODB_URI'] ?? $_SERVER['MONGODB_URI'] ?? null;
+            $dbName = getenv('MONGODB_DATABASE') ?: $_ENV['MONGODB_DATABASE'] ?? $_SERVER['MONGODB_DATABASE'] ?? null;
+            
+            error_log("[Database] MONGODB_URI from getenv(): " . (getenv('MONGODB_URI') ? 'set' : 'not set'));
+            error_log("[Database] MONGODB_URI from _ENV: " . (isset($_ENV['MONGODB_URI']) ? 'set' : 'not set'));
+            error_log("[Database] MONGODB_URI from _SERVER: " . (isset($_SERVER['MONGODB_URI']) ? 'set' : 'not set'));
             
             if (empty($uri)) {
                 throw new \Exception("Database URI is missing");
@@ -32,9 +31,20 @@ class Database {
                 throw new \Exception("Database name is missing");
             }
 
+            $options = [
+                'retryWrites' => true,
+                'w' => 'majority',
+                'ssl' => true,
+                'tls' => true,
+                'tlsAllowInvalidCertificates' => true,
+                'serverSelectionTimeoutMS' => 5000,
+                'connectTimeoutMS' => 10000
+            ];
+
+            error_log("[Database] Connection options: " . json_encode($options));
             error_log("[Database] Attempting to connect with URI: " . preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $uri));
             
-            $client = new Client($uri, $mongoConfig['options']);
+            $client = new Client($uri, $options);
             $this->database = $client->selectDatabase($dbName);
             
             // Test the connection

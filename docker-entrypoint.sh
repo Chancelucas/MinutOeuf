@@ -3,14 +3,18 @@ set -e
 
 echo "Starting entrypoint script..."
 
-# Dump environment variables (masking sensitive info)
-echo "Environment variables:"
-echo "MONGODB_URI: ${MONGODB_URI//:*@/:****@}"
-echo "MONGODB_DATABASE: $MONGODB_DATABASE"
-echo "PORT: $PORT"
-echo "APP_ENV: $APP_ENV"
-echo "APP_DEBUG: $APP_DEBUG"
-echo "APP_URL: $APP_URL"
+# Dump ALL environment variables (masking sensitive info)
+echo "=== Environment Variables ==="
+env | sort | while read -r line; do
+    if [[ $line == MONGODB_URI* ]]; then
+        echo "MONGODB_URI: [MASKED]"
+    elif [[ $line == *PASSWORD* ]] || [[ $line == *SECRET* ]]; then
+        echo "[MASKED SECRET]"
+    else
+        echo "$line"
+    fi
+done
+echo "=========================="
 
 # Vérifier les variables d'environnement requises
 if [ -z "$MONGODB_URI" ]; then
@@ -46,15 +50,21 @@ echo "Configuring Apache..."
     echo "ServerName localhost"
 } >> /etc/apache2/apache2.conf
 
-# Test database connection
+# Create a PHP info file for debugging
+echo "<?php phpinfo(); ?>" > /var/www/html/public/info.php
+
+# Test database connection with detailed output
 echo "Testing database connection..."
-if ! php /var/www/html/scripts/test_db.php; then
-    echo "Warning: Database connection test failed. Check the logs above for details."
-    # Ne pas quitter, permettre à Apache de démarrer pour afficher la page d'erreur
+php /var/www/html/scripts/test_db.php
+DB_TEST_RESULT=$?
+
+if [ $DB_TEST_RESULT -ne 0 ]; then
+    echo "Warning: Database connection test failed! Check the logs above for details."
+    # Continue anyway to show error page
 fi
 
 # Initialize database if test was successful
-if [ $? -eq 0 ]; then
+if [ $DB_TEST_RESULT -eq 0 ]; then
     echo "Initializing database..."
     if ! php /var/www/html/scripts/init_db.php; then
         echo "Warning: Database initialization failed. Check the logs above for details."

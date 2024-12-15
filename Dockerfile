@@ -20,13 +20,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Set environment variables
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-ENV PORT=80
-ENV MONGODB_URI=""
-ENV MONGODB_DATABASE=""
-ENV APP_ENV="production"
-ENV APP_DEBUG="false"
-ENV APP_URL=""
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
+    PORT=80 \
+    MONGODB_URI="" \
+    MONGODB_DATABASE="" \
+    APP_ENV="production" \
+    APP_DEBUG="false" \
+    APP_URL=""
 
 # Configure Apache
 RUN a2enmod rewrite headers
@@ -58,4 +58,4 @@ RUN chown -R www-data:www-data /var/www/html \
 RUN chmod +x docker-entrypoint.sh
 
 # Use custom entrypoint script
-CMD ["/bin/bash", "docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "docker-entrypoint.sh"]
