@@ -19,9 +19,14 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set Apache environment variables
+# Set environment variables
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV PORT=80
+ENV MONGODB_URI=""
+ENV MONGODB_DATABASE=""
+ENV APP_ENV="production"
+ENV APP_DEBUG="false"
+ENV APP_URL=""
 
 # Configure Apache
 RUN a2enmod rewrite headers
