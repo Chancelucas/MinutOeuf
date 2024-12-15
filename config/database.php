@@ -1,9 +1,14 @@
 <?php
 
+function getEnvVar($name) {
+    // Try different ways to get environment variables
+    return $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name) ?? null;
+}
+
 return [
     'mongodb' => [
-        'uri' => getenv('MONGODB_URI'),
-        'database' => getenv('MONGODB_DATABASE'),
+        'uri' => getEnvVar('MONGODB_URI'),
+        'database' => getEnvVar('MONGODB_DATABASE'),
         'options' => [
             'retryWrites' => true,
             'w' => 'majority',
