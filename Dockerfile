@@ -21,11 +21,15 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Set Apache environment variables
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+ENV PORT=80
 
 # Configure Apache
 RUN a2enmod rewrite
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Update ports.conf to use PORT environment variable
+RUN echo "Listen \${PORT}" > /etc/apache2/ports.conf
 
 # Set working directory
 WORKDIR /var/www/html
