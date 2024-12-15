@@ -16,6 +16,11 @@ env | sort | while read -r line; do
 done
 echo "=========================="
 
+# Export variables to Apache environment
+echo "Exporting variables to Apache..."
+echo "SetEnv MONGODB_URI ${MONGODB_URI}" >> /etc/apache2/conf-enabled/environment.conf
+echo "SetEnv MONGODB_DATABASE ${MONGODB_DATABASE}" >> /etc/apache2/conf-enabled/environment.conf
+
 # Vérifier les variables d'environnement requises
 if [ -z "$MONGODB_URI" ]; then
     echo "Error: MONGODB_URI is not set"
