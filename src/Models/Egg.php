@@ -12,10 +12,12 @@ class Egg {
 
     public function __construct() {
         try {
+            error_log("[Egg] Initializing Egg model");
             $this->db = Database::getInstance();
-            error_log("Database connection established successfully in Egg model");
+            error_log("[Egg] Database instance obtained successfully");
         } catch (\Exception $e) {
-            error_log("Error connecting to database in Egg model: " . $e->getMessage());
+            error_log("[Egg] Error in constructor: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur de connexion à la base de données", 0, $e);
         }
     }
@@ -26,43 +28,53 @@ class Egg {
 
     public function getAll(): array {
         try {
+            error_log("[Egg] Getting all eggs");
             if (!$this->db || !$this->db->database) {
+                error_log("[Egg] Database connection is invalid");
                 throw new DatabaseException("La connexion à la base de données n'est pas valide");
             }
 
+            error_log("[Egg] Selecting collection: " . $this->collection);
             $cursor = $this->db->database->selectCollection($this->collection)->find();
             $eggs = iterator_to_array($cursor);
+            
+            error_log("[Egg] Found " . count($eggs) . " eggs");
             
             // Convertir les documents MongoDB en tableaux PHP
             $result = array_map(function($egg) {
                 $eggArray = (array)$egg;
-                // Convertir l'ID MongoDB en string
                 if (isset($eggArray['_id']) && $eggArray['_id'] instanceof ObjectId) {
                     $eggArray['_id'] = (string)$eggArray['_id'];
                 }
                 return $eggArray;
             }, $eggs);
 
-            error_log("Nombre d'œufs trouvés : " . count($result));
+            error_log("[Egg] Successfully retrieved eggs");
             return $result;
         } catch (\Exception $e) {
-            error_log("Erreur dans getAll(): " . $e->getMessage());
+            error_log("[Egg] Error in getAll: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la récupération des œufs", 0, $e);
         }
     }
 
     public function findByType(string $type): ?array {
         try {
+            error_log("[Egg] Finding egg by type: " . $type);
             if (!$this->db || !$this->db->database) {
+                error_log("[Egg] Database connection is invalid");
                 throw new DatabaseException("La connexion à la base de données n'est pas valide");
             }
 
+            error_log("[Egg] Selecting collection: " . $this->collection);
             $result = $this->db->database->selectCollection($this->collection)->findOne(['type' => $type]);
             
             if ($result === null) {
+                error_log("[Egg] Egg not found");
                 return null;
             }
 
+            error_log("[Egg] Egg found");
             // Convertir le document MongoDB en tableau PHP
             $eggArray = (array)$result;
             if (isset($eggArray['_id']) && $eggArray['_id'] instanceof ObjectId) {
@@ -71,19 +83,23 @@ class Egg {
 
             return $eggArray;
         } catch (\Exception $e) {
-            error_log("Erreur dans findByType(): " . $e->getMessage());
+            error_log("[Egg] Error in findByType: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la recherche de l'œuf", 0, $e);
         }
     }
 
     public function findById($id): ?array {
         try {
+            error_log("[Egg] Finding egg by id: " . $id);
             $result = $this->db->database->selectCollection($this->collection)->findOne([
                 '_id' => new ObjectId($id)
             ]);
             if ($result === null) {
+                error_log("[Egg] Egg not found");
                 return null;
             }
+            error_log("[Egg] Egg found");
             // Convertir le document MongoDB en tableau PHP
             $eggArray = (array)$result;
             if (isset($eggArray['_id']) && $eggArray['_id'] instanceof ObjectId) {
@@ -91,55 +107,65 @@ class Egg {
             }
             return $eggArray;
         } catch (\Exception $e) {
-            error_log("Erreur dans findById(): " . $e->getMessage());
+            error_log("[Egg] Error in findById: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la recherche de l'œuf", 0, $e);
         }
     }
 
     public function create($data): ?string {
         try {
+            error_log("[Egg] Creating new egg");
             $result = $this->db->database->selectCollection($this->collection)->insertOne($data);
-            error_log("Œuf créé : " . json_encode($data));
+            error_log("[Egg] Egg created: " . json_encode($data));
             return (string)$result->getInsertedId();
         } catch (\Exception $e) {
-            error_log("Erreur dans create(): " . $e->getMessage());
+            error_log("[Egg] Error in create: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la création de l'œuf", 0, $e);
         }
     }
 
     public function update($id, $data): bool {
         try {
+            error_log("[Egg] Updating egg: " . $id);
             $result = $this->db->database->selectCollection($this->collection)->updateOne(
                 ['_id' => new ObjectId($id)],
                 ['$set' => $data]
             );
-            error_log("Œuf mis à jour : " . json_encode($data));
+            error_log("[Egg] Egg updated: " . json_encode($data));
             return $result->getModifiedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Erreur dans update(): " . $e->getMessage());
+            error_log("[Egg] Error in update: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la mise à jour de l'œuf", 0, $e);
         }
     }
 
     public function delete($id): bool {
         try {
+            error_log("[Egg] Deleting egg: " . $id);
             $result = $this->db->database->selectCollection($this->collection)->deleteOne(
                 ['_id' => new ObjectId($id)]
             );
-            error_log("Œuf supprimé : " . $id);
+            error_log("[Egg] Egg deleted: " . $id);
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Erreur dans delete(): " . $e->getMessage());
+            error_log("[Egg] Error in delete: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la suppression de l'œuf", 0, $e);
         }
     }
 
     public function resetData(): bool {
         try {
+            error_log("[Egg] Resetting data");
             if (!$this->db || !$this->db->database) {
+                error_log("[Egg] Database connection is invalid");
                 throw new DatabaseException("La connexion à la base de données n'est pas valide");
             }
 
+            error_log("[Egg] Deleting all existing data");
             // Supprime toutes les données existantes
             $this->db->database->selectCollection($this->collection)->deleteMany([]);
             
@@ -197,12 +223,14 @@ class Egg {
                 ]
             ];
             
+            error_log("[Egg] Inserting default data");
             $result = $this->db->database->selectCollection($this->collection)->insertMany($defaultData);
-            error_log("Données insérées avec succès : " . json_encode($result->getInsertedIds()));
+            error_log("[Egg] Data inserted successfully: " . json_encode($result->getInsertedIds()));
             
             return true;
         } catch (\Exception $e) {
-            error_log("Erreur dans resetData(): " . $e->getMessage());
+            error_log("[Egg] Error in resetData: " . $e->getMessage());
+            error_log("[Egg] Stack trace: " . $e->getTraceAsString());
             throw new DatabaseException("Erreur lors de la réinitialisation des données", 0, $e);
         }
     }

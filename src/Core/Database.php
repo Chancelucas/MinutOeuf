@@ -10,23 +10,42 @@ class Database {
 
     private function __construct() {
         try {
-            error_log("Initializing database connection");
+            error_log("[Database] Initializing database connection");
+            
+            // Vérifier les variables d'environnement
+            error_log("[Database] Checking environment variables");
+            error_log("[Database] MONGODB_URI: " . (getenv('MONGODB_URI') ? 'set' : 'not set'));
+            error_log("[Database] MONGODB_DATABASE: " . (getenv('MONGODB_DATABASE') ? 'set' : 'not set'));
+            
             $config = require __DIR__ . '/../../config/config.php';
+            error_log("[Database] Config loaded: " . json_encode($config['database'], JSON_UNESCAPED_SLASHES));
             
-            error_log("Database config: " . json_encode($config['database']));
-            
-            if (empty($config['database']['uri']) || empty($config['database']['name'])) {
-                throw new \Exception("Database configuration is incomplete");
+            if (empty($config['database']['uri'])) {
+                throw new \Exception("Database URI is missing");
+            }
+            if (empty($config['database']['name'])) {
+                throw new \Exception("Database name is missing");
             }
 
-            $client = new Client($config['database']['uri']);
+            error_log("[Database] Attempting to connect with URI: " . preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $config['database']['uri']));
+            
+            $client = new Client($config['database']['uri'], [
+                'retryWrites' => true,
+                'w' => 'majority',
+                'ssl' => true
+            ]);
+            
             $this->database = $client->selectDatabase($config['database']['name']);
             
             // Test the connection
-            $this->database->command(['ping' => 1]);
-            error_log("Database connection successful");
+            error_log("[Database] Testing connection with ping command");
+            $result = $this->database->command(['ping' => 1]);
+            error_log("[Database] Ping result: " . json_encode($result));
+            error_log("[Database] Connection successful");
+            
         } catch (\Exception $e) {
-            error_log("Database connection error: " . $e->getMessage());
+            error_log("[Database] Connection error: " . $e->getMessage());
+            error_log("[Database] Stack trace: " . $e->getTraceAsString());
             throw $e;
         }
     }
