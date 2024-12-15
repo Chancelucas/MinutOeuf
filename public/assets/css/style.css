@@ -1,108 +1,245 @@
-/* Import des fichiers de configuration et composants */
-@import url('/assets/css/config.css');
-@import url('/assets/css/navbar.css');
-@import url('/assets/css/eggs.css');
-@import url('/assets/css/auth.css');
+/* Main stylesheet that imports all other stylesheets */
 
-/* Styles généraux */
-body {
+/* Import des fichiers CSS */
+@import 'config.css';
+@import 'reset.css';
+@import 'layout.css';
+@import 'components.css';
+@import 'utilities.css';
+@import 'animations.css';
+@import 'admin.css';
+
+/* Base styles */
+:root {
+    --primary-color: #ff6b6b;
+    --secondary-color: #4ecdc4;
+    --dark-color: #2d3436;
+    --light-color: #f5f6fa;
+    --danger-color: #e74c3c;
+    --beige-color: #F9EADB;
+
+}
+
+/* Reset CSS */
+* {
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif;
-    background-color: #f5f5f5;
+    box-sizing: border-box;
 }
 
-/* Boutons */
-.btn, .button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+/* Header */
+header {
+    background-color: var(--beige-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.logo img {
+    height: 50px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+nav a {
     text-decoration: none;
-    display: inline-block;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
 }
 
-.btn-primary, .button-primary {
-    background-color: #4CAF50;
-    color: white;
+nav a:hover,
+nav a.active {
+    color: #ff6b6b;
 }
 
-.btn-primary:hover, .button-primary:hover {
-    background-color: #45a049;
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
-.btn-secondary, .button-secondary {
-    background-color: #f44336;
-    color: white;
+/* Egg Grid */
+.egg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Trois colonnes fixes */
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.btn-secondary:hover, .button-secondary:hover {
-    background-color: #da190b;
-}
-
-.btn:disabled, .button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-/* Logo */
-.logo {
-    width: 100px;
-    height: auto;
-}
-
-.logo-link {
-    text-decoration: none;
-    color: inherit;
+.egg-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
 }
 
-/* Liens */
-a {
+.egg-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.egg-card h2 {
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+}
+
+.egg-info {
+    margin: 1rem 0;
+    flex-grow: 1;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
     text-decoration: none;
-    color: inherit;
+    font-weight: 500;
+    transition: background-color 0.3s;
 }
 
-/* Timer */
-.timer {
-    font-size: 48px;
-    font-weight: bold;
+.btn-primary {
+    background-color: #ff6b6b;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #ff5252;
+}
+
+/* Egg Detail */
+.egg-detail {
+    background: #fff;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #666;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #ff6b6b;
+}
+
+.timer-section {
+    margin: 2rem 0;
     text-align: center;
-    margin: 20px 0;
+}
+
+.timer {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin: 1rem 0;
 }
 
 .timer-controls {
     display: flex;
+    gap: 1rem;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
 }
 
-/* Admin buttons */
-.admin-btn {
-    padding: 8px 16px;
+.timer-controls button {
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
-    background-color: #4CAF50;
-    color: white;
+    border-radius: 5px;
     cursor: pointer;
-    width: 100%;
-    margin: 5px 0;
-    transition: background-color 0.3s ease;
+    font-weight: 500;
+    transition: background-color 0.3s;
 }
 
-.admin-btn:hover {
-    background-color: #45a049;
+.start-timer {
+    background-color: #4caf50;
+    color: #fff;
 }
 
-/* Conteneur principal */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.stop-timer {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.reset-timer {
+    background-color: #ff9800;
+    color: #fff;
+}
+
+.timer-controls button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.egg-instructions {
+    margin-top: 2rem;
+}
+
+.egg-instructions h2 {
+    color: #ff6b6b;
+    margin: 1.5rem 0 1rem;
+}
+
+.egg-steps ol {
+    padding-left: 1.5rem;
+}
+
+.egg-steps li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .egg-grid {
+        grid-template-columns: repeat(2, 1fr); /* Deux colonnes sur tablette */
+    }
+}
+
+@media (max-width: 768px) {
+    .egg-grid {
+        grid-template-columns: 1fr; /* Une colonne sur mobile */
+    }
+    
+    nav {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    nav ul {
+        margin-top: 1rem;
+    }
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem;
+    background-color: var(--beige-color);
+    margin-top: 2rem;
 }

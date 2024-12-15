@@ -1,40 +1,56 @@
-<div id="eggContent" class="egg-content">
-    <header class="egg-header">
-        <h2><?= htmlspecialchars($egg['name']) ?></h2>
-    </header>
+<?php
+$title = htmlspecialchars($egg['type']);
+ob_start();
+?>
 
-    <section class="instructions">
-        <h3>Instructions</h3>
-        <ul id="eggInstructions">
-            <?php 
-            $instructions = is_string($egg['instructions']) ? explode("\n", $egg['instructions']) : $egg['instructions'];
-            foreach ($instructions as $instruction): ?>
-                <li><?= htmlspecialchars($instruction) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    </section>
-
-    <section class="timer-section">
-        <div class="timer">
-            <span id="minutes"><?= str_pad($egg['minutes'], 2, '0', STR_PAD_LEFT) ?></span>:<span id="seconds">00</span>
+<div class="container">
+    <div class="egg-detail">
+        <a href="/" class="back-link">&larr; Retour aux types d'œufs</a>
+        
+        <h1><?= htmlspecialchars($egg['type']) ?></h1>
+        
+        <div class="timer-section">
+            <div class="timer" id="timer">
+                <div class="timer-display">
+                    <span class="minutes">00</span>:<span class="seconds">00</span>
+                </div>
+            </div>
+            
+            <div class="timer-controls">
+                <button class="start-timer" data-time="<?= htmlspecialchars($egg['cookingTime']) ?>">
+                    Démarrer
+                </button>
+                <button class="stop-timer" disabled>Arrêter</button>
+                <button class="reset-timer" disabled>Réinitialiser</button>
+            </div>
         </div>
-        <div class="timer-controls">
-            <button id="startTimer" class="button button-primary">Démarrer</button>
-            <button id="pauseTimer" class="button button-secondary" disabled>Pause</button>
-            <button id="resetTimer" class="button button-secondary" disabled>Réinitialiser</button>
+
+        <div class="egg-instructions">
+            <div class="egg-description">
+                <h2>Description</h2>
+                <p><?= htmlspecialchars($egg['description']) ?></p>
+            </div>
+
+            <div class="egg-cooking-info">
+                <h2>Informations de cuisson</h2>
+                <ul>
+                    <li>Temps de cuisson : <strong><?= htmlspecialchars($egg['cookingTime']) ?> minutes</strong></li>
+                    <li>Température de l'eau : <strong>bouillante</strong></li>
+                </ul>
+            </div>
+
+            <div class="egg-steps">
+                <h2>Instructions étape par étape</h2>
+                <ol>
+                    <?php foreach ($egg['instructions'] as $instruction): ?>
+                        <li><?= htmlspecialchars($instruction) ?></li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
         </div>
-    </section>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialiser les boutons du minuteur
-            const startBtn = document.getElementById('startTimer');
-            const pauseBtn = document.getElementById('pauseTimer');
-            const resetBtn = document.getElementById('resetTimer');
-
-            if (startBtn) startBtn.addEventListener('click', () => publicApp.startTimer());
-            if (pauseBtn) pauseBtn.addEventListener('click', () => publicApp.pauseTimer());
-            if (resetBtn) resetBtn.addEventListener('click', () => publicApp.resetTimer());
-        });
-    </script>
+    </div>
 </div>
+
+<?php
+$content = ob_get_clean();
+require __DIR__ . '/../layout.php';

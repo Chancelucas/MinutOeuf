@@ -1,4 +1,15 @@
 RewriteEngine On
+RewriteBase /
+
+# Permettre l'accès direct aux fichiers existants
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Rediriger toutes les autres requêtes vers index.php
+RewriteRule ^ index.php [L]
+
+# Autoriser l'accès aux ressources statiques
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>

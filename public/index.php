@@ -1,25 +1,31 @@
 <?php
 
-// Activer l'affichage des erreurs pour le développement
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// Définir le mode debug
-define('APP_DEBUG', true);
+use App\Core\Router;
+use App\Core\ErrorHandler;
+use App\Controllers\EggController;
+use App\Controllers\AdminController;
 
-// Définir le chemin racine
-define('ROOT', dirname(__DIR__));
+// Configuration des gestionnaires d'erreurs
+set_error_handler([ErrorHandler::class, 'handleError']);
+set_exception_handler([ErrorHandler::class, 'handleException']);
 
-// Inclure l'autoloader de Composer
-require_once ROOT . '/vendor/autoload.php';
+$router = new Router();
 
-// Inclure l'autoloader personnalisé
-require_once ROOT . '/src/Core/Autoloader.php';
-App\Core\Autoloader::register();
+// Routes principales
+$router->get('/', [EggController::class, 'index']);
+$router->get('/egg/:type', [EggController::class, 'show']);
 
-// Charger la configuration
-App\Core\Config::load();
+// Routes admin
+$router->get('/admin', [AdminController::class, 'index']);
+$router->get('/admin/create', [AdminController::class, 'create']);
+$router->post('/admin/create', [AdminController::class, 'create']);
+$router->get('/admin/edit/:id', [AdminController::class, 'edit']);
+$router->post('/admin/edit/:id', [AdminController::class, 'edit']);
+$router->post('/admin/delete/:id', [AdminController::class, 'delete']);
 
-// Démarrer le routeur
-$router = App\Core\Router::getInstance();
+// Route de réinitialisation déplacée vers le contrôleur
+$router->get('/reset', [AdminController::class, 'reset']);
+
 $router->dispatch();

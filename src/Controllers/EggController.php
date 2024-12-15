@@ -2,74 +2,42 @@
 
 namespace App\Controllers;
 
-use App\Core\BaseController;
-use App\Models\EggModel;
+use App\Services\EggService;
+use App\Core\Exceptions\DatabaseException;
+use App\Core\Exceptions\NotFoundException;
 
-class EggController extends BaseController {
-    private EggModel $eggModel;
+class EggController {
+    private EggService $eggService;
 
     public function __construct() {
-        $this->eggModel = new EggModel();
+        $this->eggService = new EggService();
     }
 
-    /**
-     * Récupère la liste des œufs pour la navbar
-     */
-    public function getNavbarEggs(): array
-    {
+    public function index(): void {
         try {
-            return $this->eggModel->getAllEggs();
-        } catch (\Exception $e) {
-            error_log('Erreur lors de la récupération des œufs : ' . $e->getMessage());
-            return [];
+            $eggs = $this->eggService->getAllEggs();
+            require dirname(__DIR__) . '/Views/eggs/index.php';
+        } catch (DatabaseException $e) {
+            error_log($e->getMessage());
+            require dirname(__DIR__) . '/Views/errors/500.php';
         }
     }
 
-    /**
-     * API : Récupère tous les œufs
-     */
-    public function getAllEggs() {
+    public function show(string $type): void {
         try {
-            $eggs = $this->eggModel->getAllEggs();
-            if (!$eggs) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Aucun œuf trouvé'
-                ], 404);
-            }
-            return $this->json([
-                'success' => true,
-                'data' => $eggs
-            ]);
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Erreur serveur: ' . $e->getMessage()
-            ], 500);
+            $egg = $this->eggService->getEggByType(urldecode($type));
+            require dirname(__DIR__) . '/Views/eggs/show.php';
+        } catch (NotFoundException $e) {
+            require dirname(__DIR__) . '/Views/errors/404.php';
+        } catch (DatabaseException $e) {
+            error_log($e->getMessage());
+            require dirname(__DIR__) . '/Views/errors/500.php';
         }
     }
 
-    /**
-     * API : Récupère un œuf par son nom
-     */
-    public function getEggByName(string $name) {
-        try {
-            $egg = $this->eggModel->getEggByName($name);
-            if (!$egg) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Œuf non trouvé'
-                ], 404);
-            }
-            return $this->json([
-                'success' => true,
-                'data' => $egg
-            ]);
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Erreur serveur: ' . $e->getMessage()
-            ], 500);
-        }
+    public function api() {
+        header('Content-Type: application/json');
+        $eggs = $this->eggService->getAllEggs();
+        echo json_encode($eggs);
     }
 }

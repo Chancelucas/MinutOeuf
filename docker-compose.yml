@@ -1,15 +1,17 @@
-version: '3.8'
-
 services:
   php:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - MONGODB_URI=mongodb+srv://wadyx38:k7NYq73UdTaU9vwH@cluster0.4xafp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&authSource=admin
+      - MONGODB_DATABASE=minutoeuf
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8080
     ports:
       - "8080:80"
     volumes:
       - .:/var/www/html
       - /var/www/html/vendor
-    environment:
-      - MONGODB_URI=mongodb+srv://wadyx38:k7NYq73UdTaU9vwH@cluster0.4xafp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsCAFile=/etc/ssl/certs/mongodb.pem&authSource=admin
-      - MONGODB_DATABASE=minutoeuf
+    restart: unless-stopped

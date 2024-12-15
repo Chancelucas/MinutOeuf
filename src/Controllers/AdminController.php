@@ -2,81 +2,66 @@
 
 namespace App\Controllers;
 
-use App\Core\BaseController;
-use App\Models\EggModel;
-use App\Middleware\AdminMiddleware;
+use App\Models\Egg;
 
-class AdminController extends BaseController {
-    private EggModel $eggModel;
-    private AdminMiddleware $adminMiddleware;
+class AdminController {
+    private $eggModel;
 
     public function __construct() {
-        $this->eggModel = new EggModel();
-        $this->adminMiddleware = new AdminMiddleware();
+        $this->eggModel = new Egg();
     }
 
     public function index() {
-        // Vérifier l'authentification admin
-        $this->adminMiddleware->handle();
-
-        $eggs = $this->eggModel->getAllEggs();
-        return $this->render('admin/index', [
-            'title' => 'MinutOeuf - Administration',
-            'eggs' => $eggs
-        ]);
+        $eggs = $this->eggModel->getAll();
+        require __DIR__ . '/../Views/admin/index.php';
     }
 
-    public function createEgg() {
-        $this->adminMiddleware->handle();
-        
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (!$this->validateEggData($data)) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Données invalides'
-            ]);
+    public function create() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'type' => $_POST['type'],
+                'cookingTime' => (int)$_POST['cookingTime'],
+                'description' => $_POST['description'],
+                'instructions' => explode("\n", $_POST['instructions'])
+            ];
+
+            $this->eggModel->create($data);
+            header('Location: /admin');
+            exit;
         }
 
-        $result = $this->eggModel->createEgg($data);
-        return $this->json([
-            'success' => $result
-        ]);
+        require __DIR__ . '/../Views/admin/create.php';
     }
 
-    public function updateEgg(string $name) {
-        $this->adminMiddleware->handle();
+    public function edit($id) {
+        $egg = $this->eggModel->findById($id);
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (!$this->validateEggData($data)) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Données invalides'
-            ]);
+        if (!$egg) {
+            header('Location: /admin');
+            exit;
         }
 
-        $result = $this->eggModel->updateEgg($name, $data);
-        return $this->json([
-            'success' => $result
-        ]);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'type' => $_POST['type'],
+                'cookingTime' => (int)$_POST['cookingTime'],
+                'description' => $_POST['description'],
+                'instructions' => explode("\n", $_POST['instructions'])
+            ];
+
+            $this->eggModel->update($id, $data);
+            header('Location: /admin');
+            exit;
+        }
+
+        require __DIR__ . '/../Views/admin/edit.php';
     }
 
-    public function deleteEgg(string $name) {
-        $this->adminMiddleware->handle();
-        
-        $result = $this->eggModel->deleteEgg($name);
-        return $this->json([
-            'success' => $result
-        ]);
-    }
-
-    private function validateEggData(array $data): bool {
-        return isset($data['name']) &&
-               isset($data['cookingTime']) &&
-               isset($data['instructions']) &&
-               isset($data['tips']) &&
-               is_array($data['instructions']) &&
-               is_array($data['tips']);
+    public function delete($id) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->eggModel->delete($id);
+        }
+        header('Location: /admin');
+        exit;
     }
 }

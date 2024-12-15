@@ -3,23 +3,32 @@
 namespace App\Core;
 
 use MongoDB\Client;
-use MongoDB\Database as MongoDatabase;
-use App\Core\Config;
 
 class Database {
     private static ?Database $instance = null;
-    private MongoDatabase $database;
+    public $database;
 
     private function __construct() {
-        $uri = Config::get('MONGODB_URI');
-        $dbName = Config::get('MONGODB_DATABASE');
-        
-        if (empty($uri) || empty($dbName)) {
-            throw new \RuntimeException('MongoDB configuration is missing. Please check your .env file.');
-        }
+        try {
+            error_log("Initializing database connection");
+            $config = require __DIR__ . '/../../config/config.php';
+            
+            error_log("Database config: " . json_encode($config['database']));
+            
+            if (empty($config['database']['uri']) || empty($config['database']['name'])) {
+                throw new \Exception("Database configuration is incomplete");
+            }
 
-        $client = new Client($uri);
-        $this->database = $client->$dbName;
+            $client = new Client($config['database']['uri']);
+            $this->database = $client->selectDatabase($config['database']['name']);
+            
+            // Test the connection
+            $this->database->command(['ping' => 1]);
+            error_log("Database connection successful");
+        } catch (\Exception $e) {
+            error_log("Database connection error: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     public static function getInstance(): Database {
@@ -27,9 +36,5 @@ class Database {
             self::$instance = new self();
         }
         return self::$instance;
-    }
-
-    public function getDatabase(): MongoDatabase {
-        return $this->database;
     }
 }
