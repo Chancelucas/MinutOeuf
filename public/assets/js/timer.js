@@ -4,7 +4,7 @@ class Timer {
         this.timeLeft = 0;
         this.timerId = null;
         this.alarmInterval = null;
-        this.audio = new Audio('/assets/sounds/alarms.mp3');
+        this.audio = new Audio('/public/assets/sounds/alarms.mp3');
         this.audio.loop = true;
     }
 
