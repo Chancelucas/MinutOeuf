@@ -22,11 +22,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Set environment variables
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
     PORT=80 \
-    MONGODB_URI="" \
-    MONGODB_DATABASE="" \
     APP_ENV="production" \
-    APP_DEBUG="false" \
-    APP_URL=""
+    APP_DEBUG="false"
 
 # Configure Apache
 RUN a2enmod rewrite headers
