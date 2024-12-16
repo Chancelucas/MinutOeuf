@@ -1,60 +1,36 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-echo "Testing MongoDB connection...\n";
+use App\Core\Database;
+use config\MongoDBAtlasManager;
 
 try {
-    // Afficher les variables d'environnement (masquer les informations sensibles)
-    $uri = getenv('MONGODB_URI');
-    $dbName = getenv('MONGODB_DATABASE');
+    echo "Testing database connection...\n";
     
-    if (empty($uri) || empty($dbName)) {
-        throw new Exception("Missing required environment variables");
-    }
+    // Test direct connection with MongoDBAtlasManager
+    echo "Testing MongoDBAtlasManager...\n";
+    $manager = new MongoDBAtlasManager();
+    $db = $manager->getDatabase();
+    $result = $db->command(['ping' => 1]);
+    echo "MongoDBAtlasManager connection successful!\n";
     
-    $maskedUri = preg_replace('/mongodb\+srv:\/\/[^:]+:[^@]+@/', 'mongodb+srv://****:****@', $uri);
-    echo "MONGODB_URI: " . $maskedUri . "\n";
-    echo "MONGODB_DATABASE: " . $dbName . "\n";
-    echo "APP_ENV: " . getenv('APP_ENV') . "\n";
-    echo "APP_DEBUG: " . getenv('APP_DEBUG') . "\n";
-    echo "APP_URL: " . getenv('APP_URL') . "\n";
-
-    // Options de connexion MongoDB
-    $options = [
-        'retryWrites' => true,
-        'w' => 'majority',
-        'ssl' => true,
-        'tls' => true,
-        'tlsAllowInvalidCertificates' => true,
-        'serverSelectionTimeoutMS' => 5000,
-        'connectTimeoutMS' => 10000
-    ];
-
-    echo "Connection options: " . json_encode($options) . "\n";
-
-    // Tester la connexion MongoDB
-    $client = new MongoDB\Client($uri, $options);
-    $database = $client->selectDatabase($dbName);
+    // Test connection through Database class
+    echo "\nTesting Database class...\n";
+    $database = Database::getInstance();
+    $db = $database->getDatabase();
+    $result = $db->command(['ping' => 1]);
+    echo "Database class connection successful!\n";
     
-    // Tester une commande ping
-    $result = $database->command(['ping' => 1]);
-    echo "Ping successful: " . json_encode($result) . "\n";
+    // Try to read some data
+    echo "\nTrying to read data...\n";
+    $collection = $db->eggs;
+    $documents = $collection->find()->toArray();
+    echo "Found " . count($documents) . " documents in eggs collection\n";
     
-    // Lister les collections
-    $collections = $database->listCollections();
-    echo "Collections in database:\n";
-    foreach ($collections as $collection) {
-        echo "- " . $collection->getName() . "\n";
-    }
+    echo "\nAll tests passed successfully!\n";
     
-    // Compter les documents dans la collection eggs
-    $count = $database->eggs->countDocuments();
-    echo "Number of documents in eggs collection: " . $count . "\n";
-    
-    echo "MongoDB connection test successful!\n";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo "Stack trace:\n" . $e->getTraceAsString() . "\n";
-    exit(1);
 }

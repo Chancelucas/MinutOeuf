@@ -25,7 +25,10 @@ class Router {
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $method = $_SERVER['REQUEST_METHOD'];
 
-        error_log("URI reçue : " . $uri);
+        // Retirer le préfixe /public si présent
+        $uri = preg_replace('/^\/public/', '', $uri);
+        
+        error_log("URI après nettoyage : " . $uri);
 
         foreach ($this->routes as $route) {
             if ($route['method'] === $method) {
@@ -59,6 +62,10 @@ class Router {
     private function matchPath(string $routePath, string $uri): false|array {
         // Décoder l'URI pour gérer les caractères spéciaux
         $uri = urldecode($uri);
+        
+        // S'assurer que l'URI et le routePath commencent par /
+        $uri = '/' . ltrim($uri, '/');
+        $routePath = '/' . ltrim($routePath, '/');
         
         // Convertir les paramètres de route en pattern regex
         $pattern = preg_replace('/:[^\/]+/', '([^/]+)', $routePath);
